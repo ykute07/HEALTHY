@@ -1,14 +1,7 @@
-# LSTM-Autoencoder based Anomaly Detection (LAAD)
+# LSTM-Autoencoder based Anomaly Detection (HEALTHY)
 # detects abnormal RHR; uses 20 days training data; augments 8 times the training data size.
 
-######################################################
-# Author: Gireesh K. Bogu                            #
-# Email: gbogu17@stanford.edu                        #
-# Location: Dept.of Genetics, Stanford University    #
-# Date: Nov 20 2020                                   #
-######################################################
-
-#python laad.py  --heart_rate -Wearables/ASFODQR_hr.csv --steps -Wearables/ASFODQR_steps.csv --myphd_id ASFODQR --symptom_date 2024-08-14
+#python healthy.py  --heart_rate -Wearables/ASFODQR_hr.csv --steps -Wearables/ASFODQR_steps.csv --myphd_id ASFODQR --symptom_date 2024-08-14
 
 
 import warnings
@@ -85,7 +78,7 @@ BASE_LINE_DAYS = 20
 
 ########################################################################
 
-class LAAD:
+class HEALTHY:
 
     # infer resting heart rate ------------------------------------------------------
 
@@ -759,37 +752,37 @@ class LAAD:
 #################################################################################################
 
 
-LAAD = LAAD()
+HEALTHY = HEALTHY()
 
 # pre-process data
-df1 = LAAD.resting_heart_rate(fitbit_oldProtocol_hr, fitbit_oldProtocol_steps)
-processed_data = LAAD.pre_processing(df1)
+df1 = HEALTHY.resting_heart_rate(fitbit_oldProtocol_hr, fitbit_oldProtocol_steps)
+processed_data = HEALTHY.pre_processing(df1)
 
 # split dates and data using assumptions listed in the paper
-symptom_date1, symptom_date_before_20, symptom_date_before_7, symptom_date_before_10, symptom_date_after_21, train, test, test_anomaly_delta_RHR = LAAD.data_splitting(processed_data)
+symptom_date1, symptom_date_before_20, symptom_date_before_7, symptom_date_before_10, symptom_date_after_21, train, test, test_anomaly_delta_RHR = HEALTHY.data_splitting(processed_data)
 
 # standardization
-train_data, test_data, test_normal_data, test_anomaly_data, all_merged = LAAD.standardization(train, test, symptom_date_before_20, symptom_date_before_7, symptom_date_before_10, symptom_date_after_21)
+train_data, test_data, test_normal_data, test_anomaly_data, all_merged = HEALTHY.standardization(train, test, symptom_date_before_20, symptom_date_before_7, symptom_date_before_10, symptom_date_after_21)
 
 
 #  Create subsequences in tensor format from a dataframe
-train_dataset= LAAD.create_dataset(train_data[['RHR']],TIME_STEPS)
-test_dataset= LAAD.create_dataset(test_data[['RHR']],TIME_STEPS)
-#test_normal_dataset= LAAD.create_dataset(test_normal_data[['RHR']],TIME_STEPS)
-#test_anomaly_dataset= LAAD.create_dataset(test_anomaly_data[['RHR']],TIME_STEPS)
-all_merged_dataset= LAAD.create_dataset(all_merged[['RHR']],TIME_STEPS)
+train_dataset= HEALTHY.create_dataset(train_data[['RHR']],TIME_STEPS)
+test_dataset= HEALTHY.create_dataset(test_data[['RHR']],TIME_STEPS)
+#test_normal_dataset= HEALTHY.create_dataset(test_normal_data[['RHR']],TIME_STEPS)
+#test_anomaly_dataset= HEALTHY.create_dataset(test_anomaly_data[['RHR']],TIME_STEPS)
+all_merged_dataset= HEALTHY.create_dataset(all_merged[['RHR']],TIME_STEPS)
 
 
 # data augmentation of trainign dataset
-train_aug_dataset = LAAD.augmentation(train_dataset)
+train_aug_dataset = HEALTHY.augmentation(train_dataset)
 
 # Use train model as both input and target  since this is recosntruction model
 # save the best model with lowest loss
 early_stopping_callback = keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, mode="min")
 checkpoint_callback = keras.callbacks.ModelCheckpoint(myphd_id+'_model.h5', monitor='val_loss', verbose=1, save_best_only=True, mode='min')
 
-history, LA = LAAD.LA(train_aug_dataset, train_aug_dataset)
-LAAD.visualize_loss(history)
+history, LA = HEALTHY.LA(train_aug_dataset, train_aug_dataset)
+HEALTHY.visualize_loss(history)
 
 # Save the model
 #filepath = './'+myphd_id+'_model.h5'
@@ -798,39 +791,39 @@ LAAD.visualize_loss(history)
 # evaluate train dataset to calculate MAE loss and set a threshold
 predictions = LA.predict(train_dataset)
 losses = np.mean(np.abs(predictions - train_dataset), axis=1)
-LAAD.predictions_loss_train(losses, train_dataset)
-THRESHOLD = LAAD.anomaly_threshold(losses)
+HEALTHY.predictions_loss_train(losses, train_dataset)
+THRESHOLD = HEALTHY.anomaly_threshold(losses)
 
 # evaluate test normal and anomaly datasets
 #predictions = LA.predict(test_normal_dataset)
 #losses = np.mean(np.abs(predictions - test_normal_dataset), axis=1)
-#LAAD.predictions_loss_test_normal(losses, test_normal_dataset)
+#HEALTHY.predictions_loss_test_normal(losses, test_normal_dataset)
 
 #predictions = LA.predict(test_anomaly_dataset)
 #losses = np.mean(np.abs(predictions - test_anomaly_dataset), axis=1)
-#LAAD.predictions_loss_test_anomaly(losses, test_anomaly_dataset)
+#HEALTHY.predictions_loss_test_anomaly(losses, test_anomaly_dataset)
 
 # evaluate test dataset
 predictions = LA.predict(test_dataset)
 losses = np.mean(np.abs(predictions - test_dataset), axis=1)
-LAAD.predictions_loss_test(losses, test_dataset)
+HEALTHY.predictions_loss_test(losses, test_dataset)
 
 # save anomalies
-anomalies, delta_RHR = LAAD.save_anomalies(test, test_anomaly_delta_RHR)
+anomalies, delta_RHR = HEALTHY.save_anomalies(test, test_anomaly_delta_RHR)
 
 # evaluate complete dataset
 predictions = LA.predict(all_merged_dataset)
 losses = np.mean(np.abs(predictions - all_merged_dataset), axis=1)
-all_anomalies = LAAD.evaluate_complete_dataset(all_merged, THRESHOLD)
+all_anomalies = HEALTHY.evaluate_complete_dataset(all_merged, THRESHOLD)
   
 # metrics
-TP, FP, TN, FN, formatted_list_2 = LAAD.metrics_1(all_anomalies, test_normal_data, symptom_date_before_7, symptom_date_after_21)
-LAAD.visualize_complete_dataset1(all_anomalies, symptom_date1, symptom_date_before_7, symptom_date_after_21, formatted_list_2)
-LAAD.visualize_complete_dataset1(all_anomalies, symptom_date1, symptom_date_before_7, symptom_date_after_21, formatted_list_2)
-Sensitivity, Specificity, PPV, NPV, Precision, Recall, Fbeta = LAAD.metrics_2(TP, FP, TN, FN)
+TP, FP, TN, FN, formatted_list_2 = HEALTHY.metrics_1(all_anomalies, test_normal_data, symptom_date_before_7, symptom_date_after_21)
+HEALTHY.visualize_complete_dataset1(all_anomalies, symptom_date1, symptom_date_before_7, symptom_date_after_21, formatted_list_2)
+HEALTHY.visualize_complete_dataset1(all_anomalies, symptom_date1, symptom_date_before_7, symptom_date_after_21, formatted_list_2)
+Sensitivity, Specificity, PPV, NPV, Precision, Recall, Fbeta = HEALTHY.metrics_2(TP, FP, TN, FN)
 
 # visualization
-formatted_list,formatted_list_1 = LAAD.save_metrics(TP, FP, TN, FN, Sensitivity, Specificity, PPV, NPV, Precision, Recall, Fbeta)
-LAAD.visualize_complete_dataset2(all_anomalies, symptom_date1, symptom_date_before_7, symptom_date_after_21, formatted_list_1)
+formatted_list,formatted_list_1 = HEALTHY.save_metrics(TP, FP, TN, FN, Sensitivity, Specificity, PPV, NPV, Precision, Recall, Fbeta)
+HEALTHY.visualize_complete_dataset2(all_anomalies, symptom_date1, symptom_date_before_7, symptom_date_after_21, formatted_list_1)
 
 print("\nCompleted!\n")
