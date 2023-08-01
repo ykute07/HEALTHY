@@ -7,7 +7,7 @@ Link to the research paper - https://www.medrxiv.org/content/10.1101/2021.01.08.
 ### Installation 
 
 ``` 
-git clone https://github.com/gireeshkbogu/HEALTHY.git
+git clone https://github.com/ykute07/HEALTHY.git
 cd HEALTHY
 pip install -r dependencies.txt
 ```
