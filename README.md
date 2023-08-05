@@ -1,6 +1,6 @@
 # TITAN FUTURE WEAR TECHATHON 2023
 ### Team name :- Techfit Titans
-#### Hackathon Track :- Tokenization Trach & Hooks Track
+#### Hackathon Track :- Breaking Boundaries, Maximizing Results: NextGen AI Integrates with any Wearable Band Fuse for Unmatched Health Intelligence.
 
 
 ##### Team Members
@@ -10,6 +10,7 @@
 - Yogesh Kute
 
 <img src='./screenshot/prot1.jpg' />
+<img src='./screenshot/prot2.jpg' />
 
 #### Project Description
 ### Problem
@@ -57,9 +58,6 @@ $8.63M ==> Expected Revenue
 11.4 ==> MWearable Band sold in Q1 2021 Triple  growth from 2020
 
 
-
-
-<img src='./screenshot/prot2.jpg' />
 
 <img src='./screenshot/prot3.jpg' />
 
