@@ -9,8 +9,8 @@
 - Aditya Dalvi
 - Yogesh Kute
 
-<img src='./screenshot/prot1.jpg' />
-<img src='./screenshot/prot2.jpg' />
+<img src='./screenshots/prot1.jpg' />
+<img src='./screenshots/prot2.jpg' />
 
 #### Project Description
 ### Problem
@@ -59,11 +59,11 @@ $8.63M ==> Expected Revenue
 
 
 
-<img src='./screenshot/prot3.jpg' />
+<img src='./screenshots/prot3.jpg' />
 
 
 ### Architecture
-<img src='./screenshot/arch.jpg' />
+<img src='./screenshots/arch.jpg' />
 
 
 #### URLs
