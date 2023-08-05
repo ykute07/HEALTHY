@@ -1,9 +1,3 @@
-# LSTM-Autoencoder based Anomaly Detection (HEALTHY)
-# detects abnormal RHR; uses 20 days training data; augments 8 times the training data size.
-
-#python healthy.py  --heart_rate -Wearables/ASFODQR_hr.csv --steps -Wearables/ASFODQR_steps.csv --myphd_id ASFODQR --symptom_date 2024-08-14
-
-
 import warnings
 warnings.filterwarnings('ignore')
 import sys 
@@ -47,7 +41,7 @@ rcParams['figure.figsize'] = 12, 8
 parser = argparse.ArgumentParser(description='Find anomalies in wearables time-series data')
 parser.add_argument('--heart_rate', metavar='', help ='raw heart rate count with a header = heartrate')
 parser.add_argument('--steps',metavar='', help ='raw steps count with a header = steps')
-parser.add_argument('--myphd_id',metavar='', default = 'myphd_id', help ='user myphd_id')
+parser.add_argument('--unique_id',metavar='', default = 'unique_id', help ='user unique_id')
 #parser.add_argument('--symptom_date', metavar='', default = 'NaN', help = 'symptom date with y-m-d format')
 parser.add_argument('--random_seed', metavar='', type=int, default=42, help='random seed')
 args = parser.parse_args()
@@ -56,7 +50,7 @@ args = parser.parse_args()
 
 fitbit_oldProtocol_hr = args.heart_rate
 fitbit_oldProtocol_steps = args.steps
-myphd_id = args.myphd_id
+unique_id = args.unique_id
 #symptom_date = args.symptom_date
 RANDOM_SEED = args.random_seed
 
@@ -196,9 +190,9 @@ class HEALTHY:
         test_anomaly_RHR = test[symptom_date_before_7:symptom_date_after_21]
         test_anomaly_delta_RHR = test_anomaly_RHR['RHR'] - train_baseline_RHR
 
-        with open(myphd_id+'_data_split_dates.csv', 'w') as f:
+        with open(unique_id+'_data_split_dates.csv', 'w') as f:
             print("id","start_date ","symptom_date1", "symptom_date_before_20 ","symptom_date_before_7 ", "symptom_date_before_10 ", "symptom_date_after_21 ","end_date ","\n",
-                myphd_id, start1, symptom_date, symptom_date_before_20, symptom_date_before_7, symptom_date_before_10, symptom_date_after_21, end, file=f)
+                unique_id, start1, symptom_date, symptom_date_before_20, symptom_date_before_7, symptom_date_before_10, symptom_date_after_21, end, file=f)
 
         return symptom_date1, symptom_date_before_20, symptom_date_before_7, symptom_date_before_10, symptom_date_after_21, train, test, test_anomaly_delta_RHR
 
@@ -229,9 +223,9 @@ class HEALTHY:
         all_merged = pd.concat([train_data, test_data])
         #print(all_merged)
 
-        with open(myphd_id+'_data_size.csv', 'w') as f:
+        with open(unique_id+'_data_size.csv', 'w') as f:
             print("id","train ","test ", "test_normal ", "test_anomaly ","\n",
-                myphd_id, train_data.shape, test_data.shape, test_normal.shape, test_anomaly.shape, file=f)
+                unique_id, train_data.shape, test_data.shape, test_normal.shape, test_anomaly.shape, file=f)
 
         return train_data, test_data, test_normal, test_anomaly, all_merged
 
@@ -394,16 +388,16 @@ class HEALTHY:
         plt.ylabel('Loss\n')
         plt.xlabel('\nEpoch')
         plt.legend(['train', 'validation'])
-        plt.title(myphd_id)
+        plt.title(unique_id)
         plt.tight_layout()
-        figure = fig.savefig(myphd_id+"_loss.pdf")
+        figure = fig.savefig(unique_id+"_loss.pdf")
         return figure
 
 
     # save model  ------------------------------------------------------
 
     def save_model(self, model):
-        MODEL_PATH = myphd_id+'.pth'
+        MODEL_PATH = unique_id+'.pth'
         torch.save(model, MODEL_PATH)
         return MODEL_PATH
 
@@ -416,8 +410,8 @@ class HEALTHY:
 
     def predictions_loss_train(self, losses, train_dataset):
         plt.figure(figsize=(5,3))
-        figure = sns.distplot(losses, bins=50, kde=True).set_title(myphd_id)
-        plt.savefig(myphd_id+"_predictions_loss_train.pdf")
+        figure = sns.distplot(losses, bins=50, kde=True).set_title(unique_id)
+        plt.savefig(unique_id+"_predictions_loss_train.pdf")
         return figure
 
     def anomaly_threshold(self, losses):
@@ -447,20 +441,20 @@ class HEALTHY:
 
     def predictions_loss_test_normal(self, losses, train_normal_dataset):
         plt.figure(figsize=(5,3))
-        figure = sns.distplot(losses, bins=50, kde=True).set_title(myphd_id)
-        plt.savefig(myphd_id + "_predictions_loss_test_normal.pdf")
+        figure = sns.distplot(losses, bins=50, kde=True).set_title(unique_id)
+        plt.savefig(unique_id + "_predictions_loss_test_normal.pdf")
         return figure
 
     def predictions_loss_test_anomaly(self, losses, test_anomaly_dataset):
         plt.figure(figsize=(5,3))
-        figure = sns.distplot(losses, bins=50, kde=True).set_title(myphd_id)
-        plt.savefig(myphd_id + "_predictions_loss_test_anomaly.pdf")
+        figure = sns.distplot(losses, bins=50, kde=True).set_title(unique_id)
+        plt.savefig(unique_id + "_predictions_loss_test_anomaly.pdf")
         return figure
     
     def predictions_loss_test(self, losses, test_dataset):
         plt.figure(figsize=(5,3))
-        figure = sns.distplot(losses, bins=50, kde=True).set_title(myphd_id)
-        plt.savefig(myphd_id + "_predictions_loss_test.pdf")
+        figure = sns.distplot(losses, bins=50, kde=True).set_title(unique_id)
+        plt.savefig(unique_id + "_predictions_loss_test.pdf")
         return figure
 
 
@@ -482,7 +476,7 @@ class HEALTHY:
         #anomalies.loc[anomalies.RHR <=0 , 'loss'] = 0
         #anomalies.loc[anomalies.RHR <=0 , 'anomaly'] = False
 
-        print("..................................................................\n" + myphd_id +": Anomalies:")
+        print("..................................................................\n" + unique_id +": Anomalies:")
         print("..................................................................\n")
         print(anomalies)
 
@@ -491,8 +485,8 @@ class HEALTHY:
         delta_RHR = delta_RHR.rename(columns={'RHR_y':'delta_RHR'})
         delta_RHR = delta_RHR['delta_RHR']
         #print(delta_RHR)
-        delta_RHR.to_csv(myphd_id + '_delta_RHR.csv')
-        anomalies.to_csv(myphd_id + '_anomalies.csv')
+        delta_RHR.to_csv(unique_id + '_delta_RHR.csv')
+        anomalies.to_csv(unique_id + '_anomalies.csv')
         return anomalies, delta_RHR
 
     # evaluate complete dataset  ------------------------------------------------------
@@ -502,8 +496,8 @@ class HEALTHY:
 
     def evaluate_complete_dataset(self, all_merged, THRESHOLD):
         plt.figure(figsize=(5,3))
-        sns.distplot(losses, bins=50, kde=True).set_title(myphd_id)
-        plt.savefig(myphd_id + "_predictions_loss_all.pdf")
+        sns.distplot(losses, bins=50, kde=True).set_title(unique_id)
+        plt.savefig(unique_id + "_predictions_loss_all.pdf")
         anomalies = sum(l < THRESHOLD for l in losses)
 
         all_score_df = pd.DataFrame(index=all_merged[TIME_STEPS:].index)
@@ -520,7 +514,7 @@ class HEALTHY:
         #all_anomalies.loc[all_anomalies.RHR <=0 , 'loss'] = 0
         #all_anomalies.loc[all_anomalies.RHR <=0 , 'anomaly'] = False
 
-        all_anomalies.to_csv(myphd_id + '_anomalies_all.csv')
+        all_anomalies.to_csv(unique_id + '_anomalies_all.csv')
         return all_anomalies
 
 
@@ -552,7 +546,7 @@ class HEALTHY:
 
         test_anomaly_df2 = test_anomaly_df1[test_anomaly_df1['anomaly'] == True]
         TP = int(test_anomaly_df2['RHR'].values) if len(test_anomaly_df2)>0 else 0
-        print("..................................................................\n" + myphd_id +": Metrics:")
+        print("..................................................................\n" + unique_id +": Metrics:")
         print("..................................................................\n")
 
         # True negative (TN) are the number of normal days that are correctly identified as normal
@@ -582,9 +576,9 @@ class HEALTHY:
         formatted_list_2 = [TP, FP, TN, FN]
         formatted_list_2_df = pd.DataFrame([formatted_list_2])
         formatted_list_2_df.columns =['TP', 'FP', 'TN', 'FN']
-        formatted_list_2_df.rename({0: myphd_id}, axis='index')
-        formatted_list_2_df.index = [myphd_id]
-        formatted_list_2_df.to_csv(myphd_id + '_all_basic_metrics.csv', header=True)
+        formatted_list_2_df.rename({0: unique_id}, axis='index')
+        formatted_list_2_df.index = [unique_id]
+        formatted_list_2_df.to_csv(unique_id + '_all_basic_metrics.csv', header=True)
 
         formatted_list_2  = ('TP: ', TP,'FP: ', FP,'TN: ',TN,'FN:',FN)
         formatted_list_2 = listToStringWithoutBrackets(formatted_list_2)
@@ -608,11 +602,11 @@ class HEALTHY:
         ax1.tick_params(axis='both', which='major', labelsize=22)
         ax1.set_xlabel('', fontsize = 0) # X label
         ax1.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
-        ax1.set_title(myphd_id,fontweight="bold", size=30) # Title
+        ax1.set_title(unique_id,fontweight="bold", size=30) # Title
         plt.xticks(fontsize=0, rotation=90)
         plt.tick_params(axis='both',which='both',bottom=True, top=False, labelbottom=True)
         plt.tight_layout()
-        plt.savefig(myphd_id + '_all_original_seq.pdf', bbox_inches='tight')  
+        plt.savefig(unique_id + '_all_original_seq.pdf', bbox_inches='tight')  
         #plt.show()
 
 
@@ -631,13 +625,13 @@ class HEALTHY:
         ax3.axvline(pd.to_datetime(symptom_date_after_21), color='purple', zorder=1, linestyle='--', lw=6, alpha=0.5) # Symptom date 
         ax3.tick_params(axis='both', which='major', labelsize=18)
         ax3.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
-        ax3.set_title(myphd_id+ '\n', fontweight="bold", size=30) # Title
+        ax3.set_title(unique_id+ '\n', fontweight="bold", size=30) # Title
         plt.axhline(y=THRESHOLD, color='grey', linestyle='--', lw=3, alpha=0.3)
         plt.tick_params(axis='both',which='both',bottom=True, top=False, labelbottom=True) 
-        #plt.title(myphd_id + '\n\n', fontweight="bold", size=30) # Sub title
+        #plt.title(unique_id + '\n\n', fontweight="bold", size=30) # Sub title
         plt.suptitle(formatted_list_2+ '\n', fontweight="bold", size=20) # Sub title
         #plt.tight_layout()
-        plt.savefig(myphd_id + '_all_anomaly_scores.pdf', bbox_inches='tight')  
+        plt.savefig(unique_id + '_all_anomaly_scores.pdf', bbox_inches='tight')  
         #plt.show()
 
 
@@ -693,9 +687,9 @@ class HEALTHY:
 
         metrics_df = pd.DataFrame([metrics_list])
         metrics_df.columns =['TP', 'FP', 'TN', 'FN', 'Sensitivity','Specificity','PPV', 'NPV', 'Precision', 'Recall', 'Fbeta']
-        metrics_df.rename({0: myphd_id}, axis='index')
-        metrics_df.index = [myphd_id]
-        metrics_df.to_csv(myphd_id + '_metrics.csv', header=True)
+        metrics_df.rename({0: unique_id}, axis='index')
+        metrics_df.index = [unique_id]
+        metrics_df.to_csv(unique_id + '_metrics.csv', header=True)
 
         #print(metrics_df)
 
@@ -717,11 +711,11 @@ class HEALTHY:
         ax1.tick_params(axis='both', which='major', labelsize=22)
         ax1.set_xlabel('', fontsize = 0) # X label
         ax1.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
-        ax1.set_title(myphd_id,fontweight="bold", size=30) # Title
+        ax1.set_title(unique_id,fontweight="bold", size=30) # Title
         plt.xticks(fontsize=0, rotation=90)
         plt.tick_params(axis='both',which='both',bottom=True, top=False, labelbottom=True)
         plt.tight_layout()
-        plt.savefig(myphd_id + '_all_original_seq.pdf', bbox_inches='tight')  
+        plt.savefig(unique_id + '_all_original_seq.pdf', bbox_inches='tight')  
         #plt.show()
 
         # plot anomaly scores
@@ -739,13 +733,13 @@ class HEALTHY:
         ax3.axvline(pd.to_datetime(symptom_date_after_21), color='purple', zorder=1, linestyle='--', lw=6, alpha=0.5) # Symptom date 
         ax3.tick_params(axis='both', which='major', labelsize=18)
         ax3.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
-        ax3.set_title(myphd_id+ '\n', fontweight="bold", size=30) # Title
+        ax3.set_title(unique_id+ '\n', fontweight="bold", size=30) # Title
         plt.axhline(y=THRESHOLD, color='grey', linestyle='--', lw=3, alpha=0.3)
         plt.tick_params(axis='both',which='both',bottom=True, top=False, labelbottom=True) 
-        #plt.title(myphd_id + '\n\n', fontweight="bold", size=30) # Sub title
+        #plt.title(unique_id + '\n\n', fontweight="bold", size=30) # Sub title
         plt.suptitle(formatted_list_1+ '\n', fontweight="bold", size=20) # Sub title
         #plt.tight_layout()
-        plt.savefig(myphd_id + '_all_anomaly_scores.pdf', bbox_inches='tight')  
+        plt.savefig(unique_id + '_all_anomaly_scores.pdf', bbox_inches='tight')  
         #plt.show()
 
 
@@ -779,13 +773,13 @@ train_aug_dataset = HEALTHY.augmentation(train_dataset)
 # Use train model as both input and target  since this is recosntruction model
 # save the best model with lowest loss
 early_stopping_callback = keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, mode="min")
-checkpoint_callback = keras.callbacks.ModelCheckpoint(myphd_id+'_model.h5', monitor='val_loss', verbose=1, save_best_only=True, mode='min')
+checkpoint_callback = keras.callbacks.ModelCheckpoint(unique_id+'_model.h5', monitor='val_loss', verbose=1, save_best_only=True, mode='min')
 
 history, LA = HEALTHY.LA(train_aug_dataset, train_aug_dataset)
 HEALTHY.visualize_loss(history)
 
 # Save the model
-#filepath = './'+myphd_id+'_model.h5'
+#filepath = './'+unique_id+'_model.h5'
 #save_model(LA, filepath, save_format='h5')
 
 # evaluate train dataset to calculate MAE loss and set a threshold
