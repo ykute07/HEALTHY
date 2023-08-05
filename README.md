@@ -72,12 +72,9 @@ $8.63M ==> Expected Revenue
 [https://youtu.be/a6xqoBzAhnU](https://youtube.com/shorts/omnkXDpMQhA?feature=share)
 
 
-## How to Install 
-1) Download the apk file [MAPX]([https://drive.google.com/file/d/1drhh6jPr9VBvt91Sv_ETN_eopzDuYx1V/view?usp=sharing])[https://drive.google.com/file/d/1drhh6jPr9VBvt91Sv_ETN_eopzDuYx1V/view?usp=sharing] and install in your android phone 
-
-2) Catch all the NFTs
-
-<img src='./screenshot/prot4.jpg' />
+## Instruction
+1. Download the APK from https://github.com/ykute07/HEALTHY
+2. Install on your Android device
 
 
 
